@@ -169,6 +169,7 @@ new Vue({
       matchBrackets: true,
       indentUnit: 4,
       tabSize: 4,
+      indentWithTabs: false,  // Use spaces instead of tabs
     });
     this.editor.setValue("# Write your code here");
 

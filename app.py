@@ -14,6 +14,11 @@ class MainHandler(tornado.web.RequestHandler):
         await self.render("index.html")
 
 
+class OkHandler(tornado.web.RequestHandler):
+    async def get(self):
+        self.write("ok")
+
+
 
 class InitialMessagesHandler(tornado.web.RequestHandler):
 
@@ -67,6 +72,7 @@ class ExecuteHandler(tornado.web.RequestHandler):
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
+        (r"/ok", OkHandler),
         (r"/api/execute", ExecuteHandler),
         (r"/api/init", InitialMessagesHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
@@ -76,7 +82,7 @@ def make_app():
 if __name__ == "__main__":
     db.initialize_db()  # create db if necessary
     app = make_app()
-    port = 8123
+    port = 10000  # default render.com port
     print(f"Starting server on http://localhost:{port}")
     app.listen(port)
     tornado.ioloop.IOLoop.current().start()

@@ -65,14 +65,16 @@ new Vue({
         this.loading = false;
       });
     },
-    // Updates the CodeMirror editor and console output based on the last assistant message
+    // Updates the CodeMirror editor and console output based on the last user message
     updateEditorAndConsole(messages) {
       if (!messages || !Array.isArray(messages) || messages.length === 0) return;
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === "assistant" && "code" in lastMessage) {
-        this.editor.setValue(lastMessage.code);
-        this.consoleOutput = lastMessage.consoleOutput || '';
-        this.consoleError = lastMessage.consoleError || '';
+
+      const lastUserMessage = messages.slice().reverse().find(msg => msg.role === 'user');
+      console.log("lastUserMessage", lastUserMessage);
+      if (lastUserMessage && "code" in lastUserMessage) {
+        this.editor.setValue(lastUserMessage.code);
+        this.consoleOutput = lastUserMessage.consoleOutput || '';
+        this.consoleError = lastUserMessage.consoleError || '';
         this.studentQuestion = ''; // reset question
       }
       this.loading = false;  // show buttons and editors
@@ -142,6 +144,7 @@ new Vue({
         return response.json();
       })
       .then(data => {
+        console.log("messages afterRetrieveUserData", data.messages);
         if (data.messages && Array.isArray(data.messages)) {
           this.messages = data.messages;
           this.updateEditorAndConsole(this.messages);

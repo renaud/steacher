@@ -1,5 +1,6 @@
 import json
 import mimetypes
+import traceback
 
 import tornado.ioloop
 import tornado.web
@@ -16,6 +17,8 @@ class MainHandler(tornado.web.RequestHandler):
         await self.render("index.html")
 
 
+
+# to ping service
 class OkHandler(tornado.web.RequestHandler):
     async def get(self):
         self.write("ok")
@@ -36,7 +39,7 @@ class InitialMessagesHandler(tornado.web.RequestHandler):
             else:
                 self.write({"student_id": student_id, "messages": init_conversation(student_id, language)})
         except Exception as e:
-            print("exception InitialMessagesHandler", e)
+            print("exception InitialMessagesHandler", e, traceback.format_exc())
             self.set_status(500)
             self.write({"error": f"Internal server error: {str(e)}"})
 
@@ -57,7 +60,7 @@ class ExecuteHandler(tornado.web.RequestHandler):
             hint         = request.get('hint')
             messages     = request.get('messages')
 
-            new_messages, code_output = run_conversation(student_id, messages, student_code, question, hint)
+            new_messages = run_conversation(student_id, messages, student_code, question, hint)
             self.write({'messages': new_messages})
             return
 
@@ -123,16 +126,6 @@ class FileContentHandler(tornado.web.RequestHandler):
             self.write({"error": f"Internal server error: {str(e)}"})
 
     def get_mime_type(self, file_path):
-        """
-        Determines the MIME type of the file based on its extension.
-        Defaults to 'application/octet-stream' if unknown.
-
-        Args:
-            file_path (str): Path to the file.
-
-        Returns:
-            str: MIME type.
-        """
         mime_type, _ = mimetypes.guess_type(file_path)
         if mime_type:
             return mime_type
@@ -149,6 +142,7 @@ def make_app():
         (r"/api/get_file", FileContentHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
     ], debug=True)  # Enable debug mode here
+
 
 
 if __name__ == "__main__":

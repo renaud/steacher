@@ -28,39 +28,92 @@ In each interaction:
 
 ---
 
-### Interaction Format
 
-Messages will be in the following format:
+### **Message Structure**
 
+Each interaction from the student (**S**) will include the following components:
 
-User has explicitely asked for hint: {hint}
+1. **Hint Request:**
+   - Indicates whether **S** has explicitly asked for a hint.
+   - Format: `Hint requested: {True/False}`
 
-# User message:
+2. **Student's Message:**
+   - Optional text from **S** (e.g., questions, explanations).
+   - Format:
+     ```
+     # Student Message:
+     {message}
+     ```
 
-{message}
+3. **Submitted Code:**
+   - Python code that **S** has written.
+   - Format:
+     ```
+     # Student Code:
+     ```python
+     {code}
+     ```
+     ```
 
-# User code:
+4. **Code Output:**
+   - The output resulting from running **S**'s code.
+   - Format:
+     ```
+     # Code Output:
+     ```
+     {code_output}
+     ```
+     ```
+
+5. **Execution Errors (if any):**
+   - Error messages produced during code execution.
+   - Format:
+     ```
+     # Execution Errors:
+     ```
+     {error}
+     ```
+     ```
+
+**Example Message from Student:**
+
+```
+Hint requested: True
+
+# Student Message:
+
+I'm not sure how to skip the header row in the CSV.
+
+# Student Code:
 
 ```python
-{code}
+import csv
+
+temps = {}
+csvfile = open('temperatures.csv')
+reader = csv.reader(csvfile)
+for row in reader:
+    date, temp = row[0], float(row[2])
+    temps[date] = temp
 ```
 
-# Code output:
-
-```
-{code_output}
+# Code Output:
 ```
 
-# Execution error:
-
-```
-{error}
 ```
 
-- **message**: Optional text from S
-- **code**: Python code from S
-- **code_output**: Execution result of the code
-- **error**: Execution error, if any
+# Execution Error:
+```
+Traceback (most recent call last):
+  File "script.py", line 6, in <module>
+    for row in reader:
+ModuleNotFoundError: No module named 'csv'
+```
+```
+
+---
+
+---
 
 ### Exercise
 

@@ -54,7 +54,6 @@ class ExecuteHandler(tornado.web.RequestHandler):
             question     = request.get('question', "")
             hint         = request.get('hint')
             messages     = request.get('messages')
-            print(hint, messages)
 
             new_messages, code_output = run_conversation(student_id, messages, student_code, question, hint)
             self.write({'messages': new_messages})
@@ -64,7 +63,7 @@ class ExecuteHandler(tornado.web.RequestHandler):
             self.set_status(400)
             self.write({"error": "Invalid JSON in request."})
         except Exception as e:
-            print(e)
+            print("ExecuteHandler Exception", e)
             self.set_status(500)
             self.write({"error": f"Internal server error: {str(e)}"})
 

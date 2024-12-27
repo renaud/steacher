@@ -56,9 +56,10 @@ def init_conversation(student_id, language):
 
 def run_conversation(student_id, messages, code, question, hint):
 
-        print('code', code)
-        if not is_code_safe(code):
-            print('code not safe to evaluate', code)
+        #print('code', code)
+        code_safe, explanation = is_code_safe(code)
+        if not code_safe:
+            print('code not safe to evaluate', explanation, code)
             return
 
         delete_student_files(student_id)
@@ -100,10 +101,10 @@ def run_conversation(student_id, messages, code, question, hint):
             "code_output": code_output
         })
 
-        print(messages)
+        #print(messages)
 
         assistant_response = get_assistant_response(messages)
-        print(assistant_response)
+        #print(assistant_response)
 
         # Append assistant's response to the conversation
         messages.append({

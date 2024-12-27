@@ -1,0 +1,5 @@
+langchain
+openai
+restrictedpython
+shutil
+tornado

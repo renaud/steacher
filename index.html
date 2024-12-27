@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Python Exercise</title>
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+
+  <!-- Bulma CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"/>
+
+  <!-- CodeMirror CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css"/>
+
+  <!-- my CSS -->
+  <link rel="stylesheet" href="static/styles.css"/>
+
+  <!-- CodeMirror JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+
+  <!-- CodeMirror Python Mode -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Optional: DOMPurify for sanitizing HTML (recommended for security) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js"></script>
+
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- Overlay Dialog -->
+    <dialog ref="userDialog">
+      <form id="registrationForm" @submit.prevent="submitUserData">
+        <h2>Welcome! Please enter your details:</h2>
+
+        <!-- Email Input -->
+        <label for="email">HEVS Email:</label>
+        <input type="email" v-model="student_id" id="email" required />
+
+        <!-- Language Dropdown -->
+        <label for="language">Select Language:</label>
+        <select v-model="language" id="language" required>
+          <option value="french">Français</option>
+          <option value="german">Deutsch</option>
+          <option value="italian">Italiano</option>
+          <option value="english">English</option>
+        </select>
+
+        <!-- Submit Button -->
+        <button type="submit">Submit</button>
+      </form>
+    </dialog>
+
+    <div id="container">
+      <!-- Left Panel (Code Editor & Buttons & Console) -->
+      <div id="left-panel">
+        <!-- Code Editor Container -->
+        <div id="code-editor" class="editor-container">
+          <!-- Buttons -->
+          <div class="field has-addons mb-3">
+            <!-- Run Code Button -->
+            <p class="control">
+              <button class="button is-primary mr-2" @click="runCode" :disabled="loading">Run Code</button>
+            </p>
+
+            <!-- Question Input Field -->
+            <p class="control is-expanded">
+              <input
+                class="input"
+                type="text"
+                v-model="studentQuestion"
+                placeholder="Enter your question"
+                :disabled="loading"
+              />
+            </p>
+
+            <!-- Ask Question Button -->
+            <p class="control">
+              <button class="button is-info mr-2" @click="runCode" :disabled="loading">Ask Question</button>
+            </p>
+
+            <!-- Hint Button -->
+            <p class="control">
+              <button class="button is-info" @click="gimmeHint" :disabled="loading">Hint!</button>
+            </p>
+
+          </div>
+
+          <!-- Code Editor Textarea -->
+          <textarea id="editor"></textarea>
+
+          <!-- Overlay to Disable Code Editor -->
+          <div v-if="loading" class="editor-overlay">
+            <div class="spinner"></div>
+          </div>
+        </div>
+        <!-- End of Code Editor Container -->
+
+        <!-- Console Output -->
+        <div id="console">
+          <pre v-if="consoleOutput">[[ consoleOutput ]]</pre>
+          <pre v-if="consoleError" id="consoleError">[[ consoleError ]]</pre>
+        </div>
+      </div>
+      <!-- End of Left Panel -->
+
+      <!-- Right Panel (Chatbot) -->
+      <div id="chatbot">
+        <!-- Chatbot Content -->
+        <div>
+          <!-- <h3 class="title is-4">Assistant Messages:</h3> -->
+          <div v-for="(message, index) in assistantMessages" :key="index" class="box mb-3">
+            <div v-html="renderMarkdown(message.content)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- External JS -->
+  <script src="static/script.js"></script>
+</body>
+</html>

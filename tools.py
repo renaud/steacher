@@ -53,6 +53,31 @@ def copy_student_files(student_id: str, original_dir: str=ORIGINAL_DIR) -> str:
 
 
 
+def list_student_files(student_id: str) -> list:
+    """
+    Lists all files in the student's directory.
+
+    Args:
+        student_id (str): Unique identifier for the student.
+
+    Returns:
+        list: A list of file paths relative to the student's directory.
+    """
+    student_dir = os.path.join(BASE_STUDENTS_DIR, student_id)
+    file_list = []
+
+    if os.path.exists(student_dir) and os.path.isdir(student_dir):
+        for root, _, files in os.walk(student_dir):
+            for file in files:
+                # Join the root and file then make it relative to the student's directory
+                relative_path = os.path.relpath(os.path.join(root, file), student_dir)
+                file_list.append(relative_path)
+
+    return file_list
+
+
+
+
 
 def execute_code(code: str, student_id: str) -> str:
     """

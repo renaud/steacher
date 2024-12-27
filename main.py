@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from openai import OpenAI
 
-from tools import execute_code, copy_student_files, delete_student_files
+from tools import execute_code, copy_student_files, delete_student_files, list_student_files
 from safe_eval import is_code_safe
 import db
 
@@ -66,7 +66,8 @@ def run_conversation(student_id, messages, code, question, hint):
         copy_student_files(student_id)
 
         code_output, error_msg, variables = execute_code(code, student_id)
-        print('code_output',code_output)
+        student_files = list_student_files(student_id)
+        #print('code_output',code_output)
 
         # Append user message to the conversation. In str format in 'content', and json otherwise
         messages.append({
@@ -115,6 +116,7 @@ def run_conversation(student_id, messages, code, question, hint):
             "consoleError": error_msg,
             "variables": variables,
             "hint": hint,
+            "fileList": student_files,
         })
 
         db.save_messages(student_id, messages)

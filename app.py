@@ -1,11 +1,13 @@
 import json
+import mimetypes
+
 import tornado.ioloop
 import tornado.web
 import tornado.escape
 
 import db
-
 from main import init_conversation, run_conversation
+from tools import BASE_STUDENTS_DIR
 
 
 
@@ -68,12 +70,83 @@ class ExecuteHandler(tornado.web.RequestHandler):
             self.write({"error": f"Internal server error: {str(e)}"})
 
 
+
+class FileContentHandler(tornado.web.RequestHandler):
+    async def get(self):
+        """
+        Serves the content of a specified file for a given student.
+        Query Parameters:
+            - student_id: Unique identifier for the student.
+            - file: Relative path to the file within the student's directory.
+        """
+        try:
+            # Retrieve query parameters
+            student_id = self.get_query_argument('student_id', None)
+            file_name = self.get_query_argument('file', None)
+
+            # Validate query parameters
+            if not student_id or not file_name:
+                self.set_status(400)
+                self.write({"error": "Missing 'student_id' or 'file' query parameter."})
+                return
+
+            # Prevent path traversal attacks by normalizing the path
+            normalized_file_name = os.path.normpath(file_name)
+            if os.path.isabs(normalized_file_name) or normalized_file_name.startswith(".."):
+                self.set_status(400)
+                self.write({"error": "Invalid file path."})
+                return
+
+            # Construct the full path to the file
+            student_dir = os.path.join(BASE_STUDENTS_DIR, student_id)
+            file_path = os.path.join(student_dir, normalized_file_name)
+
+            # Check if the file exists and is indeed a file
+            if not os.path.exists(file_path) or not os.path.isfile(file_path):
+                self.set_status(404)
+                self.write({"error": "File not found."})
+                return
+
+            # Determine the MIME type based on file extension
+            mime_type = self.get_mime_type(file_path)
+
+            # Read and serve the file content
+            with open(file_path, 'rb') as f:
+                content = f.read()
+
+            self.set_header("Content-Type", mime_type)
+            self.write(content)
+
+        except Exception as e:
+            print("FileContentHandler Exception:", e)
+            self.set_status(500)
+            self.write({"error": f"Internal server error: {str(e)}"})
+
+    def get_mime_type(self, file_path):
+        """
+        Determines the MIME type of the file based on its extension.
+        Defaults to 'application/octet-stream' if unknown.
+
+        Args:
+            file_path (str): Path to the file.
+
+        Returns:
+            str: MIME type.
+        """
+        mime_type, _ = mimetypes.guess_type(file_path)
+        if mime_type:
+            return mime_type
+        return 'application/octet-stream'
+
+
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/ok", OkHandler),
         (r"/api/execute", ExecuteHandler),
         (r"/api/init", InitialMessagesHandler),
+        (r"/api/get_file", FileContentHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
     ], debug=True)  # Enable debug mode here
 

@@ -11,12 +11,14 @@ import db
 
 client = OpenAI()
 
+model = "gpt-4o"
+
 
 
 def get_assistant_response(messages):
     ''' Call OpenAI's API with `messages`. '''
     try:
-        response = client.chat.completions.create(model="gpt-4o",
+        response = client.chat.completions.create(model=model,
         messages=messages,
         temperature=0.7,  # Adjust for creativity
         max_tokens=150)
@@ -49,71 +51,58 @@ def init_conversation(student_id, language):
     })
 
     db.save_messages(student_id, messages)
-
     return messages
 
 
 
 def run_conversation(student_id, messages, code, question, hint):
 
-        #print('code', code)
         code_safe, explanation = is_code_safe(code)
         if not code_safe:
-            print('code not safe to evaluate', explanation, code)
-
-
-
-
-            print('code not safe to evaluate', explanation, code)
+            print('SAFETY ERROR: code not safe to evaluate', explanation, code)
 
             # Create a user message for unsafe code
             unsafe_user_message = {
                 "role": "user",
-                "content": f'''User has explicitely asked for hint: {hint}
-
-    # User Question:
-
-    {question}
-
-    # User Code:
-
-    ```python
-    {code.strip()}
-    ```
-
-    # Safety Issue:
-
-    ```
-    {explanation}
-    ```
-    ''',
                 "question": question,
                 "hint": hint,
                 "code": code,
+                "codeIsSafe": False,
                 "consoleOutput": "",  # No output since code is not executed
                 "consoleError": explanation,  # Set consoleError with explanation
                 "variables": {},
                 "fileList": [],
-                "createdAt": datetime.utcnow(),
+                "createdAt": str(datetime.utcnow().isoformat()),
+                "content": f'''User has explicitely asked for hint: {hint}
+
+# User Question:
+
+{question}
+
+# User Code:
+
+```python
+{code.strip()}
+```
+
+# Safety Issue:
+
+```
+{explanation}
+```
+'''
             }
 
             # Append the user's message about the unsafe code to the conversation
             messages.append(unsafe_user_message)
 
-            # Create an assistant message indicating the code is unsafe
-            assistant_response = "The code provided is unsafe for execution. Please review and modify your code to ensure it doesn't contain any harmful instructions."
-
             # Append assistant's response about unsafe code to the conversation
+            assistant_response = "The code provided is unsafe for execution. Please review and modify your code to ensure it doesn't contain any harmful instructions."
             messages.append({
                 "role": "assistant",
+                "creator": "codeEvaluator",
                 "content": assistant_response,
             })
-
-            # Save the messages to the database
-            db.save_messages(student_id, messages)
-
-            # Return the messages with empty code_output because execution didn't occur
-            return messages, ""
 
         else:
             # Proceed with safe code execution
@@ -124,9 +113,18 @@ def run_conversation(student_id, messages, code, question, hint):
             student_files = list_student_files(student_id)
             #print('code_output',code_output)
 
-            # Append user message to the conversation. In str format in 'content', and json otherwise
+
+            # Append a new user message to the conversation. In str format in 'content', and json otherwise
             messages.append({
                 "role": "user",
+                "question": question,
+                "hint": hint,
+                "code": code,
+                "consoleOutput":code_output,
+                "consoleError": error_msg,
+                "variables": variables,
+                "fileList": student_files,
+                "createdAt": str(datetime.utcnow().isoformat()),
                 "content": f'''Hint requested: {hint}
 
 # Student Message:
@@ -152,27 +150,20 @@ def run_conversation(student_id, messages, code, question, hint):
 ```
 
 ''',
-                "question": question,
-                "hint": hint,
-                "code": code,
-                "consoleOutput":code_output,
-                "consoleError": error_msg,
-                "variables": variables,
-                "fileList": student_files,
-                "createdAt": str(datetime.utcnow().isoformat()),
             })
 
-            #print(messages)
 
-            assistant_response = get_assistant_response(messages)
-            #print(assistant_response)
+            # Ask assistant for feedback?
+            if hint or len(question) > 0:
 
-            # Append assistant's response to the conversation
-            messages.append({
-                "role": "assistant",
-                "content": assistant_response,
-            })
+                assistant_response = get_assistant_response(messages)
 
-            db.save_messages(student_id, messages)
+                # Append assistant's response to the conversation
+                messages.append({
+                    "role": "assistant",
+                    "creator": "gpt-4o",
+                    "content": assistant_response,
+                })
 
-            return messages
+        db.save_messages(student_id, messages)
+        return messages

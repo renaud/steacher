@@ -104,10 +104,9 @@ for row in reader:
 
 # Execution Error:
 ```
-Traceback (most recent call last):
-  File "script.py", line 6, in <module>
-    for row in reader:
-ModuleNotFoundError: No module named 'csv'
+Error:
+  File "<string>", line 7, in <module>
+ValueError: could not convert string to float: 'Sensor2'
 ```
 ```
 

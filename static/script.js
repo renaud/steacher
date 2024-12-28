@@ -5,7 +5,7 @@ new Vue({
     student_id: '',
     language: '',
     messages: [],
-    studentQuestion: '',
+    question: '',
     hint: false,  // whether student explicitely asks for a hint
     editor: null,
     consoleOutput: 'Press "Run Code" to see your output here...',
@@ -35,7 +35,7 @@ new Vue({
       const payload = {
         code: code,
         student_id: this.student_id,
-        question: this.studentQuestion,
+        question: this.question,
         messages: this.messages,
         hint: this.hint,
       };
@@ -55,9 +55,7 @@ new Vue({
         return response.json();
       })
       .then(data => {
-        // Handle the response data
-        this.messages = data.messages;
-        this.updateEditorAndConsole(this.messages);
+        this.updateEditorAndConsole(data.messages);
       })
       .catch(error => {
         console.error('Error:', error);
@@ -67,6 +65,7 @@ new Vue({
     },
     // Updates the CodeMirror editor and console output based on the last user message
     updateEditorAndConsole(messages) {
+      this.messages = messages;
       if (!messages || !Array.isArray(messages) || messages.length === 0) return;
 
       const lastUserMessage = messages.slice().reverse().find(msg => msg.role === 'user');
@@ -75,7 +74,7 @@ new Vue({
         this.editor.setValue(lastUserMessage.code);
         this.consoleOutput = lastUserMessage.consoleOutput || '';
         this.consoleError = lastUserMessage.consoleError || '';
-        this.studentQuestion = ''; // reset question
+        this.question = ''; // reset question
       }
       this.loading = false;  // show buttons and editors
       this.hint = false;
@@ -146,8 +145,7 @@ new Vue({
       .then(data => {
         console.log("messages afterRetrieveUserData", data.messages);
         if (data.messages && Array.isArray(data.messages)) {
-          this.messages = data.messages;
-          this.updateEditorAndConsole(this.messages);
+          this.updateEditorAndConsole(data.messages);
         } else {
           console.error('No messages found in init response.');
         }

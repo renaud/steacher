@@ -72,7 +72,7 @@
               <input
                 class="input"
                 type="text"
-                v-model="studentQuestion"
+                v-model="question"
                 placeholder="Enter your question"
                 :disabled="loading"
               />
@@ -112,7 +112,6 @@
       <div id="chatbot">
         <!-- Chatbot Content -->
         <div>
-          <!-- <h3 class="title is-4">Assistant Messages:</h3> -->
           <div v-for="(message, index) in assistantMessages" :key="index" class="box mb-3">
             <div v-html="renderMarkdown(message.content)"></div>
           </div>
@@ -121,7 +120,6 @@
     </div>
   </div>
 
-  <!-- External JS -->
   <script src="static/script.js"></script>
 </body>
 </html>

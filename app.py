@@ -56,7 +56,7 @@ class ExecuteHandler(tornado.web.RequestHandler):
             request = tornado.escape.json_decode(self.request.body)
             student_id   = request.get('student_id')
             student_code = request.get('code')
-            question     = request.get('question', "")
+            question     = request.get('question')
             hint         = request.get('hint')
             messages     = request.get('messages')
 

@@ -1,0 +1,56 @@
+{
+  "title": "Programming Exercise Rubric: Reading CSV and Storing Data in a Dictionary",
+  "description": "This rubric assesses the correctness and quality of the Python code written to read from the 'temperatures.csv' file and store the specified columns in a dictionary named 'temps'. Each criterion is weighted based on its importance to the overall functionality and reliability of the solution.",
+  "criteria": [
+    {
+      "title": "Importing the CSV Module",
+      "description": "Correctly imports the `csv` module required for handling CSV files.",
+      "weight": 5
+    },
+    {
+      "title": "Defining the 'temps' Dictionary",
+      "description": "Initializes `temps` as an empty dictionary before populating it with data.",
+      "weight": 10
+    },
+    {
+      "title": "Opening the File Correctly",
+      "description": "Opens 'temperatures.csv' in read mode (`'r'`) without unnecessary parameters, ensuring the file is accessible for reading.",
+      "weight": 10
+    },
+    {
+      "title": "Setting Up csv.reader Properly",
+      "description": "Initializes `csv.reader` with the opened file object to correctly parse the CSV data.",
+      "weight": 10
+    },
+    {
+      "title": "Skipping the Header Row",
+      "description": "Uses `next(reader)` to skip the header row, preventing header data from being processed as actual data.",
+      "weight": 10
+    },
+    {
+      "title": "Iterating Over CSV Rows Correctly",
+      "description": "Correctly iterates through each row of the CSV file after the header, ensuring all data rows are processed.",
+      "weight": 12
+    },
+    {
+      "title": "Accessing Correct Columns",
+      "description": "Accurately accesses the first (`Date`) and third (`Sensor2`) columns in each row using appropriate indexing.",
+      "weight": 12
+    },
+    {
+      "title": "Casting Sensor2 Values to Float",
+      "description": "Properly casts the `Sensor2` values to `float` to ensure numerical operations can be performed on the data.",
+      "weight": 11
+    },
+    {
+      "title": "Storing Data in 'temps' Dictionary",
+      "description": "Stores the `Date` as the key and the corresponding `Sensor2` float value as the value in the `temps` dictionary correctly.",
+      "weight": 15
+    },
+    {
+      "title": "Closing the File",
+      "description": "Closes the file after processing to free up system resources and avoid potential file corruption.",
+      "weight": 5
+    }
+  ]
+}

@@ -8,7 +8,7 @@ new Vue({
     question: '',
     hint: false,  // whether student explicitely asks for a hint
     editor: null,
-    consoleOutput: 'Press "Run Code" to see your output here...',
+    consoleOutput: 'This is your Console. Press "Run Code" to see your output here...',
     consoleError: '',
     loading: false,  // disables the UI while backend is computing the response
   },

@@ -6,9 +6,26 @@ import tornado.ioloop
 import tornado.web
 import tornado.escape
 
-import db
-from main import init_conversation, run_conversation
-from tools import BASE_STUDENTS_DIR
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+
+
+def setup_logging(log_file_path):
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG) # general log level
+    # Rotating file handler
+    rotating_handler = RotatingFileHandler(log_file_path, maxBytes=5*1024*1024, backupCount=50)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    rotating_handler.setFormatter(formatter)
+    logger.addHandler(rotating_handler)
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    # Suppress unnecessary logs from other libs
+    for lib in ['tornado', 'asyncio', 'httpx', 'httpcore', 'openai']:
+        logging.getLogger(lib).setLevel(logging.WARNING)
 
 
 
@@ -146,9 +163,19 @@ def make_app():
 
 
 if __name__ == "__main__":
+
+    log_file = os.path.join(os.path.dirname(__file__), "app.log")
+    setup_logging(log_file)
+
+    # Import other modules after logging is configured
+    import db
+    from main import init_conversation, run_conversation
+    from tools import BASE_STUDENTS_DIR
+
+
     db.initialize_db()  # create db if necessary
     app = make_app()
     port = 10000  # default render.com port
-    print(f"Starting server on http://localhost:{port}")
+    logging.info(f"Starting server on http://localhost:{port}")
     app.listen(port)
     tornado.ioloop.IOLoop.current().start()

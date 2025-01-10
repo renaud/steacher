@@ -4,6 +4,9 @@ from datetime import datetime
 
 from openai import OpenAI
 
+import logging
+LOG = logging.getLogger(__name__)
+
 from tools import execute_code, copy_student_files, delete_student_files, list_student_files
 from safe_eval import is_code_safe
 import db
@@ -24,6 +27,7 @@ def get_assistant_response(messages):
         max_tokens=150)
         return response.choices[0].message.content.strip()
     except Exception as e:
+        LOG.warn(f"Error communicating with OpenAI API: {e}, {messages}")
         return f"Error communicating with OpenAI API: {e}"
 
 
@@ -36,13 +40,15 @@ def init_conversation(student_id, language):
         system_prompt = file.read()
 
     # add language at end of prompt
-    lang_prompt = f'\n\nYou will **interact with S in {language}**. Code is in English.'
+    lang_prompt = f'\n\nYou will **interact with me (student) in {language}**. Python code is always in English.'
     messages = [
         {"role": "system", "content": system_prompt + lang_prompt},
     ]
+    LOG.debug(messages)
 
     # fetch initial response
     assistant_response = get_assistant_response(messages)
+    LOG.debug(assistant_response)
 
     # Append assistant's response to the conversation
     messages.append({
@@ -59,7 +65,7 @@ def run_conversation(student_id, messages, code, question, hint):
 
         code_safe, explanation = is_code_safe(code)
         if not code_safe:
-            print('SAFETY ERROR: code not safe to evaluate', explanation, code)
+            LOG.error(f'SAFETY ERROR: code not safe to evaluate, {explanation} {code}')
 
             # Create a user message for unsafe code
             unsafe_user_message = {
@@ -111,7 +117,7 @@ def run_conversation(student_id, messages, code, question, hint):
 
             code_output, error_msg, variables = execute_code(code, student_id)
             student_files = list_student_files(student_id)
-            #print('code_output',code_output)
+            LOG.debug('code_output',code_output)
 
 
             # Append a new user message to the conversation. In str format in 'content', and json otherwise

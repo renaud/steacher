@@ -52,6 +52,8 @@ html, body {
 #console pre#consoleError {
   background-color: black;
   color: red;
+  white-space: pre-wrap; 
+  word-wrap: break-word;
 }
 
 /* Chatbot Panel (40%) */

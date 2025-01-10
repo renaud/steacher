@@ -122,6 +122,29 @@
             <div v-html="renderMarkdown(message.content)"></div>
           </div>
         </div>
+        
+        <!-- Section for Question Input and Hint Button -->
+        <div class="field has-addons mt-3">
+          <!-- Single Input Field -->
+          <p class="control is-expanded">
+            <input
+              class="input"
+              type="text"
+              v-model="question"
+              placeholder="Enter your question"
+              :disabled="loading"
+            />
+          </p>
+          <!-- Ask Question Button -->
+          <p class="control">
+            <button class="button is-info mr-2" @click="runCode" :disabled="loading">Ask Question</button>
+          </p>
+          <!-- Hint Button -->
+          <p class="control">
+            <button class="button is-info" @click="gimmeHint" :disabled="loading">Hint!</button>
+          </p>
+        </div>
+
       </div>
     </div>
   </div>

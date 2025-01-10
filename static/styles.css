@@ -160,3 +160,19 @@ dialog {
 dialog::backdrop {
   backdrop-filter: blur(2px)!important;
 }
+
+/* User Message Styling */
+.user-message {
+  background-color: #e0f7fa; /* Light cyan background for user messages */
+  border-radius: 5px;
+  margin-left: auto; /* Pushes the message to the right */
+  max-width: 90%; /* Limit the width of the message */
+}
+
+/* Assistant Message Styling */
+.assistant-message {
+  text-align: left; /* Align text to the left */
+  border-radius: 5px;
+  margin-right: auto; /* Pushes the message to the left */
+  max-width: 80%; /* Limit the width of the message */
+}

@@ -13,9 +13,10 @@ new Vue({
     loading: false,  // disables the UI while backend is computing the response
   },
   computed: {
-    // Computed property to filter only assistant messages
-    assistantMessages() {
-      return this.messages.filter(msg => msg.role === 'assistant');
+    // Computed property to include both user and assistant messages
+    chatMessages() {
+      return this.messages.filter(
+        msg => msg.role === 'assistant' || (msg.role === 'user' && msg.question !== ''));
     }
   },
   methods: {
@@ -185,7 +186,7 @@ new Vue({
     this.editor.refresh();
   },
   watch: {
-    assistantMessages() {
+    chatMessages() {
       this.scrollToBottom();
     }
   }

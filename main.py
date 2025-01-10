@@ -38,23 +38,16 @@ def init_conversation(student_id, language):
     # init prompts
     with open("prompt.md", 'r', encoding='utf-8') as file:
         system_prompt = file.read()
+    with open("initial_instruction.md", 'r', encoding='utf-8') as file:
+        initial_instructions = file.read()
 
     # add language at end of prompt
     lang_prompt = f'\n\nYou will **interact with me (student) in {language}**. Python code is always in English.'
     messages = [
         {"role": "system", "content": system_prompt + lang_prompt},
+        {"role": "assistant", "content": initial_instructions}
     ]
     LOG.debug(messages)
-
-    # fetch initial response
-    assistant_response = get_assistant_response(messages)
-    LOG.debug(assistant_response)
-
-    # Append assistant's response to the conversation
-    messages.append({
-            "role": "assistant",
-            "content": assistant_response,
-    })
 
     db.save_messages(student_id, messages)
     return messages
@@ -117,7 +110,7 @@ def run_conversation(student_id, messages, code, question, hint):
 
             code_output, error_msg, variables = execute_code(code, student_id)
             student_files = list_student_files(student_id)
-            LOG.debug('code_output',code_output)
+            LOG.debug(f'code_output: {code_output}')
 
 
             # Append a new user message to the conversation. In str format in 'content', and json otherwise

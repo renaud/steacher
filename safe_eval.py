@@ -1,6 +1,10 @@
 import os
 from openai import OpenAI
 
+import logging
+LOG = logging.getLogger(__name__)
+
+
 client = OpenAI()
 
 def is_code_safe(code: str) -> bool:

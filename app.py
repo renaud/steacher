@@ -28,18 +28,15 @@ def setup_logging(log_file_path):
         logging.getLogger(lib).setLevel(logging.WARNING)
 
 
-
 class MainHandler(tornado.web.RequestHandler):
     async def get(self):
         await self.render("index.html")
 
 
-
-# to ping service
 class OkHandler(tornado.web.RequestHandler):
+    ''' to ping service '''
     async def get(self):
         self.write("ok")
-
 
 
 class InitialMessagesHandler(tornado.web.RequestHandler):
@@ -88,7 +85,6 @@ class ExecuteHandler(tornado.web.RequestHandler):
             print("ExecuteHandler Exception", e)
             self.set_status(500)
             self.write({"error": f"Internal server error: {str(e)}"})
-
 
 
 class FileContentHandler(tornado.web.RequestHandler):
@@ -149,7 +145,6 @@ class FileContentHandler(tornado.web.RequestHandler):
         return 'application/octet-stream'
 
 
-
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -159,7 +154,6 @@ def make_app():
         (r"/api/get_file", FileContentHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
     ], debug=True)  # Enable debug mode here
-
 
 
 if __name__ == "__main__":

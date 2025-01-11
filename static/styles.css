@@ -20,13 +20,14 @@ html, body {
   width: 60%; /* Fixed 60% width */
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #dbdbdb; /* Optional: Separator line */
 }
 
 /* Code Editor Section */
 #code-editor {
   flex: 1; /* Occupies remaining space */
-  padding: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
   background-color: #f5f5f5;
   display: flex;
   flex-direction: column;
@@ -39,7 +40,6 @@ html, body {
 
 /* Console Section */
 #console {
-  padding: 10px;
   background-color: black;
   font-family: monospace;
   height: 150px; /* Fixed height for console */
@@ -79,8 +79,6 @@ html, body {
   border: 1px solid #dbdbdb; /* Optional: Border around the editor */
   border-radius: 4px; /* Optional: Rounded corners */
 }
-
-
 
 
 /* ------------------------------
@@ -127,8 +125,6 @@ html, body {
 }
 
 
-
-
 /* Basic styling for the dialog */
 dialog {
   border: none;
@@ -163,10 +159,12 @@ dialog::backdrop {
 
 /* User Message Styling */
 .user-message {
-  background-color: #e0f7fa; /* Light cyan background for user messages */
+  background-color: #E8E8E880; /* Light gray background for user messages */
   border-radius: 5px;
   margin-left: auto; /* Pushes the message to the right */
-  max-width: 90%; /* Limit the width of the message */
+  max-width: 80%; /* Limit the width of the message */
+  box-shadow: none;
+  border: 1px solid lightgray;
 }
 
 /* Assistant Message Styling */
@@ -174,5 +172,20 @@ dialog::backdrop {
   text-align: left; /* Align text to the left */
   border-radius: 5px;
   margin-right: auto; /* Pushes the message to the left */
-  max-width: 80%; /* Limit the width of the message */
+  /* max-width: 90%; Limit the width of the message */
+  box-shadow: none;
+  border: 1px solid lightgray;
+  padding: 10px;
+}
+
+/* Styling of list items for Chatbot messages */
+.box {
+    /* Ensure the box has padding to contain its content */
+    padding: 1em;
+    overflow: hidden; /* Ensure content doesn't overflow */
+}
+.box ol, .box ul {
+    /* Reset margin and padding for lists within boxes */
+    margin: 0;
+    padding-left: 1em; /* Indent list items */
 }

@@ -61,7 +61,7 @@ new Vue({
       .then(data => {
         this.updateEditorAndConsole(data.messages);
         // Trigger the assessment after receiving the execute response
-        this.initiateAssessment(this.student_id, code);
+        this.initiateAssessment(code);
       })
       .catch(error => {
         console.error('Error executing code:', error);
@@ -181,13 +181,21 @@ new Vue({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     },
-    initiateAssessment(studentId, code) {
+    initiateAssessment(code) {
+      // Get createdAt timestamp from last user message, to associate this assessment with the correct message in the db.
+      const lastUserMessage = this.messages.slice().reverse().find(msg => msg.role === 'user');
+      const createdAt = lastUserMessage ? lastUserMessage.createdAt : null;
+
       fetch('/api/assessment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ code: code })
+        body: JSON.stringify({ 
+          code: code, 
+          createdAt: createdAt,
+          student_id: this.student_id
+        })
       })
       .then(response => {
         if (response.ok) {

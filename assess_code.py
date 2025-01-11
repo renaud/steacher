@@ -123,33 +123,31 @@ def compute_score(rubric, rubric_evaluated):
 
 
 
-def grade(student_code, rubric_json='rubric.json') -> float:
-    '''returns a score btw 0 and 100.'''
+def grade(student_code, rubric_json='rubric.json') -> (int, str):
+    ''' @returns a score btw 0 and 100 and the rubric evaluation (a json string), 
+        or None, None if error.'''
     try:
         rubric = load_rubric(rubric_json)
         prompt = prepare_prompt(rubric, student_code)
 
         rubric_evaluated = call_openai_api(prompt, model="gpt-4o-mini")
-        #print(json.dumps(rubric_evaluated.model_dump_json(), indent=2))
 
         if rubric_evaluated:
             keys_match = check_keys_match(rubric, rubric_evaluated)
             if keys_match:
-                #print("Rubrics have matching keys in the correct order.")
                 score = compute_score(rubric, rubric_evaluated)
-                #print(f"Total Score: {score}")
-                return score
+                return score, rubric_evaluated.model_dump_json()
             else:
                 print("Rubrics do not match in keys or order.")
-                return -1
+                return None, None
 
             #display_grading(rubric_evaluated)
         else:
             print("Failed to evaluate rubric.")
-            return -1
+            return None, None
     except Exception as e:
         print("Error evaluating rubric", e)
-        return -1
+        return None, None
 
 
 

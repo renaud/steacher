@@ -147,17 +147,23 @@ class FileContentHandler(tornado.web.RequestHandler):
 class AssessmentResultHandler(tornado.web.RequestHandler):
     async def post(self):
         try:
-            # Parse JSON body
             request = tornado.escape.json_decode(self.request.body)
             code = request.get('code')
-            if not code:
+            created_at = request.get('createdAt')
+            student_id = request.get('student_id')
+
+            if not code or not created_at or not student_id:
                 self.set_status(400)
-                self.write({"error": "Missing 'code' in request."})
+                self.write({"error": "Missing 'code', 'createdAt', or 'student_id' in request."})
                 return
+
             # Compute the assessment score based on the provided code
-            score = grade(code)
+            score, rubric_evaluated = grade(code)
             logging.info(f"Assessment score: {score}")
+
             if score is not None:
+                # Save the grading result to the database
+                db.save_grading_result(student_id, created_at, score, rubric_evaluated)
                 self.write({'score': score})
             else:
                 self.set_status(500)

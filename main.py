@@ -50,7 +50,6 @@ def init_conversation(student_id, language):
         {"role": "system", "content": system_prompt + lang_prompt},
         {"role": "assistant", "content": initial_instructions}
     ]
-    LOG.debug(messages)
 
     db.save_messages(student_id, messages)
     return messages

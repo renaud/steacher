@@ -1,6 +1,7 @@
 import sqlite3
-import datetime
 import json
+from typing import List, Dict
+
 
 def get_db_connection():
     conn = sqlite3.connect('history.db')
@@ -17,11 +18,21 @@ def initialize_db():
             data TEXT
         )
     ''')
+    # Create a new table for grading results
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS grading_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id TEXT,
+            created_at TEXT,
+            score INTEGER,
+            rubric_evaluated TEXT
+        )
+    ''')
     conn.commit()
     conn.close()
 
 
-def save_messages(student_id, messages):
+def save_messages(student_id: str, messages: List[Dict]):
 
     # Do not store empty chats
     if not any(msg['role'] == 'user' for msg in messages):
@@ -39,7 +50,7 @@ def save_messages(student_id, messages):
     conn.close()
 
 
-def get_messages(student_id):
+def get_messages(student_id: str):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT data FROM history WHERE student_id = ?", (student_id,))
@@ -48,3 +59,14 @@ def get_messages(student_id):
     if row:
         return json.loads(row['data'])
     return None
+
+
+def save_grading_result(student_id: str, created_at: str, score: int, rubric_evaluated: str):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO grading_results (student_id, created_at, score, rubric_evaluated) VALUES (?, ?, ?, ?)",
+        (student_id, created_at, score, rubric_evaluated)
+    )
+    conn.commit()
+    conn.close()

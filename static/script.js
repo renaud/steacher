@@ -194,6 +194,14 @@ new Vue({
       .then(data => {
         if (data.score !== undefined) {
           this.assessmentProgress = data.score;
+          if (data.score === 100) {
+            // Trigger confetti when score is 100
+            confetti({
+              particleCount: 200,
+              spread: 150,
+              origin: { y: 0.6 }
+            });
+          }
         } else {
           console.error('Failed to compute assessment score.');
         }

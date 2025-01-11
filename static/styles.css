@@ -44,10 +44,13 @@ html, body {
   font-family: monospace;
   height: 150px; /* Fixed height for console */
   overflow-y: auto;
+  padding: 10px;
 }
 #console pre {
   background-color: black;
   color: white;
+  margin: 0;
+  padding: 0px;
 }
 #console pre#consoleError {
   background-color: black;

@@ -9,56 +9,35 @@ client = OpenAI()
 
 def is_code_safe(code: str) -> bool:
     """
-    Evaluates whether the provided Python code is safe to run.
+    Evaluates whether the provided Python code is unsafe to run.
 
     Parameters:
         code (str): The Python code to evaluate.
 
     Returns:
-        str: "True" if the code is safe to run, "False" otherwise.
+        str: "False" if the code is unsafe to run, "True" otherwise.
     """
-
-    # empty code is ok :-)
+    # allow empty code
     if len(code.strip()) == 0:
         return True
 
 
     prompt = f"""
-You are an AI assistant that evaluates whether a given piece of Python code is safe to execute. Follow these guidelines to determine safety:
+You are an AI assistant that evaluates whether a given piece of Python code is UNSAFE to execute. Identify only genuinely dangerous patterns that could lead to security or stability issues:
 
-1. **Allowed Operations:**
-   - Writing comments.
-   - Printing to the console.
-   - Defining and using variables.
-   - Writing and calling functions.
-   - Importing modules from the following safe list:
-     - `csv`
-     - `math`
-     - `random`
-   - Reading from and writing to files **only within the current working directory**.
-   - NameError, ValueError, etc. are **totally ok**.
+1. **Truly Dangerous Operations:**
+   - Importing modules that can execute system commands or access network interfaces, such as:
+     - `os`, `subprocess`, `socket`, `threading`, `multiprocessing`, `shutil`, etc.
+   - Using functions or methods that execute system commands or open network connections, including:
+     - `os.system`, `subprocess.run`, `exec`, `eval`
+   - Accessing, modifying, or deleting environment variables or dangerous file paths (e.g., with `../`).
 
-2. **Disallowed Operations:**
-   - Importing any modules **not** in the allowed list.
-   - Using functions or methods that execute system commands, modify system settings, or perform network operations, such as:
-     - `os.system`
-     - `subprocess.Popen`
-     - `eval`, `exec`
-     - Any functions from the `os`, `sys` modules that can alter the environment
-   - Accessing or modifying environment variables.
-   - Importing modules like `socket`, `threading`, `multiprocessing`, `shutil`, etc.
+2. **File Operations:**
+   - Identify dangerous file operations that manipulate files outside the current directory.
 
-3. **File Operations:**
-   - Ensure that file paths do not traverse directories (e.g., no `../` patterns).
-   - Only allow reading from and writing to files within the current directory.
-   - It's ok not to specify the mode, as reading (`r`) is the default mode.
-
-4. **Code Structure:**
-   - The code may have indentation issues or syntax errors; focus only on the safety of operations.
-
-5. **Response Format:**
-   - Reply **ONLY** with `"True"` if the code adheres to all safety guidelines.
-   - Reply with `"False"` if the code violates any safety guidelines and **explain why** it violates any safety guidelines.
+3. **Response Format:**
+   - Reply **ONLY** with `"False"` if the code meets any of the dangerous criteria above.
+   - Reply with `"True"` if no dangerous actions are identified.
 
 **Here is the code to evaluate:**
 
@@ -80,11 +59,10 @@ You are an AI assistant that evaluates whether a given piece of Python code is s
         )
 
         answer = completion.choices[0].message.content.strip()
-        #print(answer)
         if answer.lower().startswith("true"):
-            return True, None
+            return True
         else:
-            return False, answer
+            return False
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -146,8 +124,8 @@ print('hello')
     # Run tests
     for idx, test in enumerate(test_cases, 1):
         print(f"Test Case {idx}: {test['description']}")
-        result, explanation = is_code_safe(test['code'])
-        print(f" Expected: {test['expected']}, Got: {result}. Explanation: {explanation}")
+        result = is_code_safe(test['code'])
+        print(f" Expected: {test['expected']}, Got: {result}")
         print("Result:", "PASS" if result == test['expected'] else "FAIL")
         print("-" * 50)
 

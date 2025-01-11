@@ -82,7 +82,7 @@ class ExecuteHandler(tornado.web.RequestHandler):
             self.set_status(400)
             self.write({"error": "Invalid JSON in request."})
         except Exception as e:
-            print("ExecuteHandler Exception", e)
+            logging.error(f"ExecuteHandler Exception: {e}, Stacktrace: {traceback.format_exc()}")
             self.set_status(500)
             self.write({"error": f"Internal server error: {str(e)}"})
 

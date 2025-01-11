@@ -35,7 +35,13 @@ def init_conversation(student_id, language):
     # init prompts
     with open("prompt.md", 'r', encoding='utf-8') as file:
         system_prompt = file.read()
-    with open("initial_instruction.md", 'r', encoding='utf-8') as file:
+    
+    # Determine the correct initial instruction file based on language
+    instruction_file = f"initial_instruction_{language}.md"
+    if not os.path.exists(instruction_file):
+        LOG.warn(f"Instruction file for language '{language}' not found. Defaulting to English.")
+        instruction_file = "initial_instruction_en.md"
+    with open(instruction_file, 'r', encoding='utf-8') as file:
         initial_instructions = file.read()
 
     # add language at end of prompt

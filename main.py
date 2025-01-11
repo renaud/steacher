@@ -11,11 +11,8 @@ from tools import execute_code, copy_student_files, delete_student_files, list_s
 from safe_eval import is_code_safe
 import db
 
-
 client = OpenAI()
-
 model = "gpt-4o"
-
 
 
 def get_assistant_response(messages):

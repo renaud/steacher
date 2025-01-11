@@ -10,7 +10,6 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-
 def setup_logging(log_file_path):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG) # general log level
@@ -145,6 +144,30 @@ class FileContentHandler(tornado.web.RequestHandler):
         return 'application/octet-stream'
 
 
+class AssessmentResultHandler(tornado.web.RequestHandler):
+    async def post(self):
+        try:
+            # Parse JSON body
+            request = tornado.escape.json_decode(self.request.body)
+            code = request.get('code')
+            if not code:
+                self.set_status(400)
+                self.write({"error": "Missing 'code' in request."})
+                return
+            # Compute the assessment score based on the provided code
+            score = grade(code)
+            logging.info(f"Assessment score: {score}")
+            if score is not None:
+                self.write({'score': score})
+            else:
+                self.set_status(500)
+                self.write({'error': 'Failed to compute assessment score.'})
+        except Exception as e:
+            logging.error(f"AssessmentResultHandler Exception: {e}, Stacktrace: {traceback.format_exc()}")
+            self.set_status(500)
+            self.write({"error": f"Internal server error: {str(e)}"})
+
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -152,6 +175,7 @@ def make_app():
         (r"/api/execute", ExecuteHandler),
         (r"/api/init", InitialMessagesHandler),
         (r"/api/get_file", FileContentHandler),
+        (r"/api/assessment", AssessmentResultHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
     ], debug=True)  # Enable debug mode here
 
@@ -165,6 +189,7 @@ if __name__ == "__main__":
     import db
     from main import init_conversation, run_conversation
     from tools import BASE_STUDENTS_DIR
+    from assess_code import grade
 
 
     db.initialize_db()  # create db if necessary

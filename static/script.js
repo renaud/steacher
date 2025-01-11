@@ -6,11 +6,13 @@ new Vue({
     language: '',
     messages: [],
     question: '',
-    hint: false,  // whether student explicitely asks for a hint
+    hint: false,  // whether student explicitly asks for a hint
     editor: null,
     consoleOutput: 'This is your Console. Press "Run Code" to see your output here...',
     consoleError: '',
     loading: false,  // disables the UI while backend is computing the response
+    assessmentProgress: 0, // progress bar, 0-100
+    grading: false, // new data property to manage grading state
   },
   computed: {
     // Computed property to include both user and assistant messages
@@ -31,7 +33,8 @@ new Vue({
       this.runCode();
     },
     runCode() {
-      this.loading = true; // disable buttons & editor
+      this.loading = true; // Disable buttons & editor
+      this.grading = true; // Start grading animation
       const code = this.editor.getValue();
       const payload = {
         code: code,
@@ -57,11 +60,14 @@ new Vue({
       })
       .then(data => {
         this.updateEditorAndConsole(data.messages);
+        // Trigger the assessment after receiving the execute response
+        this.initiateAssessment(this.student_id, code);
       })
       .catch(error => {
-        console.error('Error:', error);
+        console.error('Error executing code:', error);
         this.consoleError = 'Error executing code.';
         this.loading = false;
+        this.grading = false; // Stop grading animation on error
       });
     },
     // Updates the CodeMirror editor and console output based on the last user message
@@ -70,14 +76,14 @@ new Vue({
       if (!messages || !Array.isArray(messages) || messages.length === 0) return;
 
       const lastUserMessage = messages.slice().reverse().find(msg => msg.role === 'user');
-      console.log("lastUserMessage", lastUserMessage);
+      console.log("Last User Message:", lastUserMessage);
       if (lastUserMessage && "code" in lastUserMessage) {
         this.editor.setValue(lastUserMessage.code);
         this.consoleOutput = lastUserMessage.consoleOutput || '';
         this.consoleError = lastUserMessage.consoleError || '';
-        this.question = ''; // reset question
+        this.question = ''; // Reset question
       }
-      this.loading = false;  // show buttons and editors
+      this.loading = false;  // Show buttons and editors
       this.hint = false;
     },
     // Scroll to the bottom of the chatbot
@@ -126,10 +132,10 @@ new Vue({
         alert('Please enter both email and language.');
       }
     },
-    // whole lot of initialization here below:
+    // Initialization after retrieving user data
     afterRetrieveUserData(){
       // Fetch initial messages from the backend
-      this.loading = true; // disable buttons & editor
+      this.loading = true; // Disable buttons & editor
       fetch('/api/init', {
         method: 'POST',
         headers: {
@@ -144,7 +150,7 @@ new Vue({
         return response.json();
       })
       .then(data => {
-        console.log("messages afterRetrieveUserData", data.messages);
+        console.log("Messages afterRetrieveUserData:", data.messages);
         if (data.messages && Array.isArray(data.messages)) {
           this.updateEditorAndConsole(data.messages);
         } else {
@@ -153,23 +159,52 @@ new Vue({
       })
       .catch(error => {
         console.error('Error initializing messages:', error);
-        //this.messages.push({ role: 'assistant', content: 'Failed to load initial messages.' });
+        // Optionally, notify the user about the initialization failure
+        this.consoleError = 'Failed to load initial messages.';
+        this.loading = false;
       });
-
-
     },
     downloadScript() {
-        const scriptContent = this.editor.getValue();
-        const blob = new Blob([scriptContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'script.js';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
+      const scriptContent = this.editor.getValue();
+      const blob = new Blob([scriptContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'script.js';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+    initiateAssessment(studentId, code) {
+      fetch('/api/assessment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code: code })
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(`Assessment API error: ${response.status}`);
+        }
+      })
+      .then(data => {
+        if (data.score !== undefined) {
+          this.assessmentProgress = data.score;
+        } else {
+          console.error('Failed to compute assessment score.');
+        }
+        this.grading = false; // Stop grading animation after assessment
+      })
+      .catch(error => {
+        console.error('Error initiating assessment:', error);
+        this.consoleError = 'Error initiating assessment.';
+        this.grading = false; // Stop grading animation on error
+      });
+    },
   },
   mounted() {
     this.retrieveUserData();
@@ -177,7 +212,7 @@ new Vue({
     // Initialize CodeMirror
     this.editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
       lineNumbers: true,
-      mode: "python",
+      mode: "python", // Adjust if language changes
       theme: "default",
       autoCloseBrackets: true,
       matchBrackets: true,
@@ -203,3 +238,5 @@ new Vue({
     }
   }
 });
+
+

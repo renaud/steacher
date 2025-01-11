@@ -103,6 +103,21 @@
 
           </div>
 
+          <!-- Progress Bar -->
+          <div class="assessment-progress" 
+               :class="{ 'grayed-out': grading }" 
+               style="display: flex; align-items: center; width: 100%;">
+            <span style="font-weight: bold; color: black; margin-right: 10px;">
+              [[ assessmentProgress ]]%
+            </span>
+            <progress class="progress is-small is-success" 
+                      :value="assessmentProgress" 
+                      max="100" 
+                      style="flex-grow: 1;">
+              [[ assessmentProgress ]]%
+            </progress>
+          </div>
+
           <!-- Code Editor Textarea -->
           <textarea id="editor"></textarea>
 
@@ -161,6 +176,7 @@
 
       </div>
     </div>
+    
   </div>
 
   <script src="static/script.js"></script>

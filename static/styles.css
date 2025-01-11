@@ -232,3 +232,15 @@ dialog::backdrop {
 .hamburger-menu:hover .dropdown-content {
   display: block;
 }
+
+/* Add styles for the progress bar */
+.assessment-progress {
+  margin-bottom: 5px;
+}
+/* Disabled effect for the progress bar container */
+.grayed-out {
+  opacity: 0.2; /* Reduce opacity to make it look disabled */
+  cursor: not-allowed; /* Change cursor to indicate non-interactivity */
+  transition: opacity 0.3s ease;
+}
+

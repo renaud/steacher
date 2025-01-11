@@ -1,10 +1,10 @@
 # Steacher
 
+<img src="static/logo.jpg" alt="Steacher Logo" width="150" />
+
 We've all seen our students copy-pasting code into chatGPT to get direct answers. But it's a terrible way to learn with AI.
 
 Here's an idea: **have the AI guide the student by asking questions and providing feedback, never by writing the code for them.** À la [Socratic method](https://en.wikipedia.org/wiki/Socratic_method). See also Khan Academy's [Khanmigo](https://docsbot.ai/prompts/education/khanmigo-lite-socratic-tutor).
-
-<img src="static/logo.jpg" alt="Steacher Logo" width="150" />
 
 ## Features
 
@@ -31,4 +31,4 @@ Point your web browser to `http://localhost:10000`
 
 ## Contact
 
-For any questions or feedback, please contact us at [renaud.richardet@hevs.ch](mailto:renaud.richardet@hevs.ch)
+For any questions or feedback, please contact [renaud.richardet@hevs.ch](mailto:renaud.richardet@hevs.ch)

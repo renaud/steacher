@@ -27,9 +27,9 @@ def setup_logging(log_file_path):
         logging.getLogger(lib).setLevel(logging.WARNING)
 
 
-class MainHandler(tornado.web.RequestHandler):
-    async def get(self):
-        await self.render("index.html")
+class QuestionHandler(tornado.web.RequestHandler):
+    async def get(self, question_id):
+        await self.render("code_editor.html", question_id=question_id)
 
 
 class OkHandler(tornado.web.RequestHandler):
@@ -44,13 +44,14 @@ class InitialMessagesHandler(tornado.web.RequestHandler):
         try:
             request = tornado.escape.json_decode(self.request.body)
             student_id = request.get('student_id')
+            question_id = request.get('question_id')
             language   = request.get('language')
             # check if there's already a message history for this student
-            messages = db.get_messages(student_id)
+            messages = db.get_messages(student_id, question_id)
             if messages:
                 self.write({"student_id": student_id, "messages": messages})
             else:
-                self.write({"student_id": student_id, "messages": init_conversation(student_id, language)})
+                self.write({"student_id": student_id, "messages": init_conversation(student_id, question_id, language)})
         except Exception as e:
             print("exception InitialMessagesHandler", e, traceback.format_exc())
             self.set_status(500)
@@ -68,12 +69,19 @@ class ExecuteHandler(tornado.web.RequestHandler):
             # Parse JSON body
             request = tornado.escape.json_decode(self.request.body)
             student_id   = request.get('student_id')
+            question_id  = request.get('question_id')
             student_code = request.get('code')
             question     = request.get('question')
             hint         = request.get('hint')
             messages     = request.get('messages')
 
-            new_messages = run_conversation(student_id, messages, student_code, question, hint)
+            # check for student_id, question_id
+            if not student_id or not question_id:
+                self.set_status(400)
+                self.write({"error": "Missing 'student_id' or 'question_id' in request."})
+                return
+
+            new_messages = run_conversation(student_id, question_id, messages, student_code, question, hint)
             self.write({'messages': new_messages})
             return
 
@@ -87,6 +95,7 @@ class ExecuteHandler(tornado.web.RequestHandler):
 
 
 class FileContentHandler(tornado.web.RequestHandler):
+    # TODO not used yet
     async def get(self):
         """
         Serves the content of a specified file for a given student.
@@ -151,19 +160,20 @@ class AssessmentResultHandler(tornado.web.RequestHandler):
             code = request.get('code')
             created_at = request.get('createdAt')
             student_id = request.get('student_id')
+            question_id = request.get('question_id')
 
-            if not code or not created_at or not student_id:
+            if not code or not created_at or not student_id or not question_id:
                 self.set_status(400)
-                self.write({"error": "Missing 'code', 'createdAt', or 'student_id' in request."})
+                self.write({"error": "Missing 'code', 'createdAt', 'student_id', or 'question_id' in request."})
                 return
 
             # Compute the assessment score based on the provided code
-            score, rubric_evaluated = grade(code)
+            score, rubric_evaluated = grade(code, question_id)
             logging.info(f"Assessment score: {score}")
 
             if score is not None:
                 # Save the grading result to the database
-                db.save_grading_result(student_id, created_at, score, rubric_evaluated)
+                db.save_grading_result(student_id, question_id, created_at, score, rubric_evaluated)
                 self.write({'score': score})
             else:
                 self.set_status(500)
@@ -176,11 +186,11 @@ class AssessmentResultHandler(tornado.web.RequestHandler):
 
 def make_app():
     return tornado.web.Application([
-        (r"/", MainHandler),
+        (r"/code_editor/(.*)", QuestionHandler),
         (r"/ok", OkHandler),
         (r"/api/execute", ExecuteHandler),
         (r"/api/init", InitialMessagesHandler),
-        (r"/api/get_file", FileContentHandler),
+        # (r"/api/get_file", FileContentHandler),
         (r"/api/assessment", AssessmentResultHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
     ], debug=True)  # Enable debug mode here

@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 from datetime import datetime
+from typing import List, Dict
 
 from openai import OpenAI
 
@@ -29,35 +30,41 @@ def get_assistant_response(messages):
 
 
 
-def init_conversation(student_id, language):
+def init_conversation(student_id: str, question_id: str, language: str):
     ''' Initialize the conversation with the system prompt and assistant's initial message'''
 
     # init prompts
-    with open("prompt.md", 'r', encoding='utf-8') as file:
+    with open(f"exercises/{question_id}/prompt.md", 'r', encoding='utf-8') as file:
         system_prompt = file.read()
     
     # Determine the correct initial instruction file based on language
-    instruction_file = f"initial_instruction_{language}.md"
+    instruction_file = f"exercises/{question_id}/initial_instruction_{language}.md"
     if not os.path.exists(instruction_file):
         LOG.warn(f"Instruction file for language '{language}' not found. Defaulting to English.")
-        instruction_file = "initial_instruction_en.md"
+        instruction_file = f"exercises/{question_id}/initial_instruction_en.md"
     with open(instruction_file, 'r', encoding='utf-8') as file:
         initial_instructions = file.read()
 
+    # map iso language code to language name
+    lang_name = {
+        'en': 'English',
+        'fr': 'French',
+        'de': 'German',
+    }
     # add language at end of prompt
-    lang_prompt = f'\n\nYou will **interact with me (student) in {language}**. Python code is always in English.'
+    lang_prompt = f'\n\nYou will **interact with me (student) in {lang_name[language]}**. Python code is always in English.'
     messages = [
-        {"role": "system", "content": system_prompt + lang_prompt},
+        {"role": "system", "content": system_prompt + lang_prompt, "question_id": question_id, "student_id": student_id},
         {"role": "assistant", "content": initial_instructions}
     ]
 
-    db.save_messages(student_id, messages)
+    db.save_messages(student_id, question_id, messages)
     return messages
 
 
 
-def run_conversation(student_id, messages, code, question, hint):
-    code_safe = is_code_safe(code)
+def run_conversation(student_id: str, question_id: str, messages: List[Dict], code: str, question: str, hint):
+    code_safe = is_code_safe(code) # TODO: add allowed modules & other restrictions to the safe_eval.py on a per exercise basis 
     if not code_safe:
         LOG.error(f'SAFETY ERROR: code not safe to evaluate, {code}')
         code_output = ""
@@ -66,13 +73,13 @@ def run_conversation(student_id, messages, code, question, hint):
 
     else:
         # Proceed with safe code execution
-        delete_student_files(student_id)
-        copy_student_files(student_id)
+        delete_student_files(student_id, question_id)
+        copy_student_files(student_id, question_id)
 
-        code_output, error_msg, variables = execute_code(code, student_id)
+        code_output, error_msg, variables = execute_code(code, student_id, question_id)
         LOG.debug(f'code_output: {code_output}')
 
-    student_files = list_student_files(student_id)
+    student_files = list_student_files(student_id, question_id)
     
     # Append a new user message to the conversation. In str format in 'content', and json otherwise
     messages.append({
@@ -124,5 +131,5 @@ def run_conversation(student_id, messages, code, question, hint):
             "content": assistant_response,
         })
 
-    db.save_messages(student_id, messages)
+    db.save_messages(student_id, question_id, messages)
     return messages

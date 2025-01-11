@@ -13,6 +13,7 @@ new Vue({
     loading: false,  // disables the UI while backend is computing the response
     assessmentProgress: 0, // progress bar, 0-100
     grading: false, // new data property to manage grading state
+    question_id: '',  
   },
   computed: {
     // Computed property to include both user and assistant messages
@@ -37,9 +38,10 @@ new Vue({
       this.grading = true; // Start grading animation
       const code = this.editor.getValue();
       const payload = {
-        code: code,
         student_id: this.student_id,
+        question_id: this.question_id,
         question: this.question,
+        code: code,
         messages: this.messages,
         hint: this.hint,
       };
@@ -146,7 +148,7 @@ new Vue({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ student_id: this.student_id, language: this.language }),
+        body: JSON.stringify({ student_id: this.student_id, language: this.language, question_id: this.question_id }),
       })
       .then(response => {
         if (!response.ok) {
@@ -192,9 +194,10 @@ new Vue({
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
+          student_id: this.student_id,
+          question_id: this.question_id,
           code: code, 
-          createdAt: createdAt,
-          student_id: this.student_id
+          createdAt: createdAt
         })
       })
       .then(response => {
@@ -228,6 +231,10 @@ new Vue({
     },
   },
   mounted() {
+    // Retrieve question_id from the data attribute
+    this.question_id = document.getElementById('app').dataset.questionId;
+    console.log("Question ID:", this.question_id);
+
     this.retrieveUserData();
 
     // Initialize CodeMirror

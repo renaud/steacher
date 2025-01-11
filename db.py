@@ -15,6 +15,7 @@ def initialize_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS history (
             student_id TEXT PRIMARY KEY,
+            question_id TEXT,
             data TEXT
         )
     ''')
@@ -23,6 +24,7 @@ def initialize_db():
         CREATE TABLE IF NOT EXISTS grading_results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             student_id TEXT,
+            question_id TEXT,
             created_at TEXT,
             score INTEGER,
             rubric_evaluated TEXT
@@ -32,7 +34,7 @@ def initialize_db():
     conn.close()
 
 
-def save_messages(student_id: str, messages: List[Dict]):
+def save_messages(student_id: str, question_id: str, messages: List[Dict]):
 
     # Do not store empty chats
     if not any(msg['role'] == 'user' for msg in messages):
@@ -43,17 +45,17 @@ def save_messages(student_id: str, messages: List[Dict]):
 
     # Use 'REPLACE INTO' to overwrite existing chat with the same chat_id
     cursor.execute(
-        "REPLACE INTO history (student_id, data) VALUES (?, ?)",
-        (student_id, json.dumps(messages))
+        "REPLACE INTO history (student_id, question_id, data) VALUES (?, ?, ?)",
+        (student_id, question_id, json.dumps(messages))
     )
     conn.commit()
     conn.close()
 
 
-def get_messages(student_id: str):
+def get_messages(student_id: str, question_id: str):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT data FROM history WHERE student_id = ?", (student_id,))
+    cursor.execute("SELECT data FROM history WHERE student_id = ? AND question_id = ?", (student_id, question_id))
     row = cursor.fetchone()
     conn.close()
     if row:
@@ -61,12 +63,12 @@ def get_messages(student_id: str):
     return None
 
 
-def save_grading_result(student_id: str, created_at: str, score: int, rubric_evaluated: str):
+def save_grading_result(student_id: str, question_id: str, created_at: str, score: int, rubric_evaluated: str):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO grading_results (student_id, created_at, score, rubric_evaluated) VALUES (?, ?, ?, ?)",
-        (student_id, created_at, score, rubric_evaluated)
+        "INSERT INTO grading_results (student_id, question_id, created_at, score, rubric_evaluated) VALUES (?, ?, ?, ?, ?)",
+        (student_id, question_id, created_at, score, rubric_evaluated)
     )
     conn.commit()
     conn.close()

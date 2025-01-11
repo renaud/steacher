@@ -6,54 +6,47 @@ import shutil
 import json
 
 
+# where the original code is stored. it's in exercises/{question_id/
 ORIGINAL_DIR = "original_code"
-# Define the base directory for all students
+# Define the base directory for all students, it's also in exercises/{question_id/
 BASE_STUDENTS_DIR = "students_code"
-# Create the base directory if it doesn't exist
-os.makedirs(BASE_STUDENTS_DIR, exist_ok=True)
 
 
-
-def delete_student_files(student_id: str) -> str:
-    student_dir = os.path.join(BASE_STUDENTS_DIR, student_id)
+def delete_student_files(student_id: str, question_id: str) -> str:
+    student_dir = os.path.join('exercises', question_id, BASE_STUDENTS_DIR, student_id)
     if os.path.exists(student_dir):
         shutil.rmtree(student_dir)
 
 
 
-def copy_student_files(student_id: str, original_dir: str=ORIGINAL_DIR) -> str:
+def copy_student_files(student_id: str, question_id: str) -> None:
     """
     Copies files from the original directory to the student's unique directory.
 
     Args:
         student_id (str): Unique identifier for the student.
-        original_dir (str): Path to the original directory containing the files to copy.
-
-    Returns:
-        str: Success or error message.
+        question_id (str): Unique identifier for the question.
     """
     try:
         # Define the student's directory path
-        student_dir = os.path.join(BASE_STUDENTS_DIR, student_id)
+        student_dir = os.path.join('exercises', question_id, BASE_STUDENTS_DIR, student_id)
 
         # Create the student's directory if it doesn't exist
         os.makedirs(student_dir, exist_ok=True)
 
         # Copy all files and subdirectories from original_dir to student_dir
+        original_dir = os.path.join('exercises', question_id, ORIGINAL_DIR)
         if os.path.isdir(original_dir):
             shutil.copytree(original_dir, student_dir, dirs_exist_ok=True)
         else:
-            return f"Error: The original directory '{original_dir}' does not exist."
-
-        return f"Files successfully copied to {student_dir}."
+            raise Exception(f"The original directory '{original_dir}' does not exist.")
 
     except Exception as e:
-        return f"Error copying files: {str(e)}"
+        raise Exception(f"Error copying files: {str(e)}")
 
 
 
-
-def list_student_files(student_id: str) -> list:
+def list_student_files(student_id: str, question_id: str) -> list:
     """
     Lists all files in the student's directory.
 
@@ -63,7 +56,7 @@ def list_student_files(student_id: str) -> list:
     Returns:
         list: A list of file paths relative to the student's directory.
     """
-    student_dir = os.path.join(BASE_STUDENTS_DIR, student_id)
+    student_dir = os.path.join('exercises', question_id, BASE_STUDENTS_DIR, student_id)
     file_list = []
 
     if os.path.exists(student_dir) and os.path.isdir(student_dir):
@@ -77,9 +70,7 @@ def list_student_files(student_id: str) -> list:
 
 
 
-
-
-def execute_code(code: str, student_id: str) -> str:
+def execute_code(code: str, student_id: str, question_id: str) -> str:
     """
     Execute Python code passed as a string in a specified working directory.
 
@@ -91,7 +82,7 @@ def execute_code(code: str, student_id: str) -> str:
         str: The standard output and standard error produced by the executed code.
     """
 
-    student_dir = os.path.join(BASE_STUDENTS_DIR, student_id)
+    student_dir = os.path.join('exercises', question_id, BASE_STUDENTS_DIR, student_id)
     # Save the current working directory to restore later
     original_directory = os.getcwd()
     output = io.StringIO()
@@ -136,8 +127,6 @@ def execute_code(code: str, student_id: str) -> str:
         variables_json = json.dumps(
             {k: str(v) for k, v in captured_vars.items()}, indent=4
         )
-
-
 
     return output.getvalue(), error_msg, variables_json
 

@@ -123,10 +123,11 @@ def compute_score(rubric, rubric_evaluated):
 
 
 
-def grade(student_code, rubric_json='rubric.json') -> (int, str):
+def grade(student_code, question_id) -> (int, str):
     ''' @returns a score btw 0 and 100 and the rubric evaluation (a json string), 
         or None, None if error.'''
     try:
+        rubric_json = f"exercises/{question_id}/rubric.json"
         rubric = load_rubric(rubric_json)
         prompt = prepare_prompt(rubric, student_code)
 

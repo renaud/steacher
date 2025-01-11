@@ -158,6 +158,18 @@ new Vue({
 
 
     },
+    downloadScript() {
+        const scriptContent = this.editor.getValue();
+        const blob = new Blob([scriptContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'script.js';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
   },
   mounted() {
     this.retrieveUserData();
@@ -171,7 +183,7 @@ new Vue({
       matchBrackets: true,
       indentUnit: 4,
       tabSize: 4,
-      indentWithTabs: false,  // Use spaces instead of tabs
+      indentWithTabs: false,
     });
     this.editor.setValue("# Write your code here");
 

@@ -68,6 +68,13 @@
         <div id="code-editor" class="editor-container">
           <!-- Buttons -->
           <div class="field has-addons mb-3">
+            <!-- Add the hamburger menu icon -->
+            <div class="hamburger-menu">
+                <span>&#9776;</span> <!-- Unicode for hamburger icon -->
+                <div class="dropdown-content">
+                    <a href="#" @click.prevent="downloadScript">Download Script</a>
+                </div>
+            </div>
             <!-- Run Code Button -->
             <p class="control">
               <button class="button is-primary mr-2" @click="runCode" :disabled="loading">Run Code</button>

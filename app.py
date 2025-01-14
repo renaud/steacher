@@ -184,6 +184,11 @@ class AssessmentResultHandler(tornado.web.RequestHandler):
             self.write({"error": f"Internal server error: {str(e)}"})
 
 
+class RootRedirectHandler(tornado.web.RequestHandler):
+    async def get(self):
+        self.redirect("/code_editor/5_csv_temperatures")
+
+
 def make_app():
     return tornado.web.Application([
         (r"/code_editor/(.*)", QuestionHandler),
@@ -193,6 +198,7 @@ def make_app():
         # (r"/api/get_file", FileContentHandler),
         (r"/api/assessment", AssessmentResultHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
+        (r"/", RootRedirectHandler),
     ], debug=True)  # Enable debug mode here
 
 

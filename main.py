@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 from datetime import datetime
 from typing import List, Dict
+import uuid
 
 from openai import OpenAI
 
@@ -33,22 +34,6 @@ def get_assistant_response(messages):
 def init_conversation(student_id: str, question_id: str, language: str):
     ''' Initialize the conversation with the system prompt and assistant's initial message'''
 
-
-    # print pwd
-    print(os.getcwd())
-    # list all files in pwd
-    print(os.listdir())
-    # print all system env variables
-    print(os.environ)
-
-    print("--------------------------------")
-    print(f"questionid : {question_id}")
-    print(f"language : {language}")
-
-    # print all files in exercises
-    print(os.listdir('exercises'))  
-    print(os.listdir('exercises/5_csv_temperatures'))
-
     # init prompts
     with open(f"exercises/{question_id}/prompt.md", 'r', encoding='utf-8') as file:
         system_prompt = file.read()
@@ -70,8 +55,8 @@ def init_conversation(student_id: str, question_id: str, language: str):
     # add language at end of prompt
     lang_prompt = f'\n\nYou will **interact with me (student) in {lang_name[language]}**. Python code is always in English.'
     messages = [
-        {"role": "system", "content": system_prompt + lang_prompt, "question_id": question_id, "student_id": student_id},
-        {"role": "assistant", "content": initial_instructions}
+        {"role": "system", "content": system_prompt + lang_prompt, "question_id": question_id, "student_id": student_id, "uuid": str(uuid.uuid4())},
+        {"role": "assistant", "content": initial_instructions, "uuid": str(uuid.uuid4())}
     ]
 
     db.save_messages(student_id, question_id, messages)
@@ -99,6 +84,7 @@ def run_conversation(student_id: str, question_id: str, messages: List[Dict], co
     
     # Append a new user message to the conversation. In str format in 'content', and json otherwise
     messages.append({
+        "uuid": str(uuid.uuid4()),
         "role": "user",
         "question": question,
         "hint": hint,
@@ -137,11 +123,12 @@ def run_conversation(student_id: str, question_id: str, messages: List[Dict], co
     })
 
     # Ask assistant for feedback?
-    if hint or len(question) > 0 or (not code_safe):
+    if hint or len(question) > 0 or (not code_safe) or error_msg:
         assistant_response = get_assistant_response(messages)
 
         # Append assistant's response to the conversation
         messages.append({
+            "uuid": str(uuid.uuid4()),
             "role": "assistant",
             "creator": "gpt-4o",
             "content": assistant_response,

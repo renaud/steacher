@@ -244,3 +244,16 @@ dialog::backdrop {
   transition: opacity 0.3s ease;
 }
 
+
+.glow {
+  animation: glow-animation 3s ease-in-out;
+}
+
+@keyframes glow-animation {
+  0% {
+    background-color: lightgreen;
+  }
+  100% {
+    background-color: transparent;
+  }
+}

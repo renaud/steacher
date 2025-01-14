@@ -14,6 +14,7 @@ new Vue({
     assessmentProgress: 0, // progress bar, 0-100
     grading: false, // new data property to manage grading state
     question_id: '',  
+    lastGlowedMessageUuid: null, // Track the last glowed message UUID
   },
   computed: {
     // Computed property to include both user and assistant messages
@@ -87,6 +88,20 @@ new Vue({
       }
       this.loading = false;  // Show buttons and editors
       this.hint = false;
+
+      // Add glow effect to the latest message if it hasn't been glowed yet
+      const latestMessage = messages[messages.length - 1];
+      if (latestMessage && latestMessage.uuid !== this.lastGlowedMessageUuid) {
+        this.$nextTick(() => {
+          const latestMessageElement = this.$el.querySelector(`.assistant-message:last-child, .user-message:last-child`);
+          if (latestMessageElement) {
+            latestMessageElement.classList.add('glow');
+            setTimeout(() => latestMessageElement.classList.remove('glow'), 3000); // Remove glow after 1 second
+          }
+        });
+        // Update the last glowed message UUID
+        this.lastGlowedMessageUuid = latestMessage.uuid;
+      }
     },
     // Scroll to the bottom of the chatbot
     scrollToBottom() {

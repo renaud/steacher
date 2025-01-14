@@ -40,7 +40,14 @@ def init_conversation(student_id: str, question_id: str, language: str):
     print(os.listdir())
     # print all system env variables
     print(os.environ)
-    
+
+    print("--------------------------------")
+    print(f"questionid : {question_id}")
+
+    # print all files in exercises
+    print(os.listdir('exercises'))  
+    print(os.listdir('exercises/5_csv_temperatures'))
+
     # init prompts
     with open(f"exercises/{question_id}/prompt.md", 'r', encoding='utf-8') as file:
         system_prompt = file.read()

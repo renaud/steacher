@@ -43,6 +43,7 @@ def init_conversation(student_id: str, question_id: str, language: str):
 
     print("--------------------------------")
     print(f"questionid : {question_id}")
+    print(f"language : {language}")
 
     # print all files in exercises
     print(os.listdir('exercises'))  

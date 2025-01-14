@@ -1,6 +1,7 @@
 import json
 import mimetypes
 import traceback
+from datetime import datetime
 
 import tornado.ioloop
 import tornado.web
@@ -35,7 +36,7 @@ class QuestionHandler(tornado.web.RequestHandler):
 class OkHandler(tornado.web.RequestHandler):
     ''' to ping service '''
     async def get(self):
-        self.write("ok")
+        self.write(f"ok {datetime.now()}")
 
 
 class InitialMessagesHandler(tornado.web.RequestHandler):

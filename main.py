@@ -33,6 +33,14 @@ def get_assistant_response(messages):
 def init_conversation(student_id: str, question_id: str, language: str):
     ''' Initialize the conversation with the system prompt and assistant's initial message'''
 
+
+    # print pwd
+    print(os.getcwd())
+    # list all files in pwd
+    print(os.listdir())
+    # print all system env variables
+    print(os.environ)
+    
     # init prompts
     with open(f"exercises/{question_id}/prompt.md", 'r', encoding='utf-8') as file:
         system_prompt = file.read()

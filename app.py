@@ -10,6 +10,7 @@ import tornado.escape
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+from flask import Flask, send_file
 
 def setup_logging(log_file_path):
     logger = logging.getLogger()
@@ -201,6 +202,15 @@ def make_app():
         (r"/static/(.*)", tornado.web.StaticFileHandler, {'path': 'static'}),
         (r"/", RootRedirectHandler),
     ], debug=True)  # Enable debug mode here
+
+
+@app.route('/download-db', methods=['GET'])
+def download_db():
+    db_path = 'history.db'  # Path to your SQLite database file
+    if os.path.exists(db_path):
+        return send_file(db_path, as_attachment=True, attachment_filename='history.db')
+    else:
+        return "Database file not found.", 404
 
 
 if __name__ == "__main__":

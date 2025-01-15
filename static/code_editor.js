@@ -136,9 +136,9 @@ new Vue({
     submitUserData() {
       // Basic validation
       if (this.student_id && this.language) {
-        // Check if the email ends with @hevs.ch
-        if (!this.student_id.endsWith('@hevs.ch')) {
-          alert('Please enter a valid HEVS email address.');
+        // Check if the email contains an @ sign
+        if (!this.student_id.includes('@')) {
+          alert('Please enter a valid email address.');
           return;
         }
         // remove anything after the @

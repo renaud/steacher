@@ -12,6 +12,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask, send_file
 
+# Initialize the Flask app
+app = Flask(__name__)
+
 def setup_logging(log_file_path):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG) # general log level

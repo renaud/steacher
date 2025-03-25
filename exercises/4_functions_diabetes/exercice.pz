@@ -1,0 +1,48 @@
+## **Évaluation du Risque de Diabète**
+
+Créer une fonction nommée `evaluer_risque_diabete` qui évalue le risque de diabète basé sur un indice de glycémie à jeun.
+
+   - Votre fonction prend en paramètre `glycemie` (float) représentant la glycémie (à jeun, en mg/dL).
+   - Elle retournera une chaîne de caractères indiquant le risque :
+     - `"Normale"` si `glycemie` < 100 mg/dL
+     - `"Prédiabète"` si 100 ≤ `glycemie` ≤ 125 mg/dL
+     - `"Diabète"` si `glycemie` ≥ 126 mg/dL
+   - Si `glycemie` est négative, votre fonction retournera `"Valeur invalide"`.
+
+**Testez votre fonction** ainsi :
+
+
+```python
+print(evaluer_risque_diabete(90.2))   # doit imprimer: Normale
+print(evaluer_risque_diabete(110.2))  # doit imprimer: Prédiabète
+print(evaluer_risque_diabete(130.5))  # doit imprimer: Diabète
+print(evaluer_risque_diabete(-50))    # doit imprimer: Valeur invalide
+```
+
+
+
+---
+
+## **Solution :**
+
+```python
+def evaluer_risque_diabete(glycemie):
+    """
+    Évalue le risque de diabète basé sur la glycémie à jeun.
+
+    Args:
+        glycemie (float): Glycémie à jeun en mg/dL.
+
+    Returns:
+        str: Catégorie de risque ("Normale", "Prédiabète", "Diabète", "Valeur invalide").
+    """
+    if glycemie < 0:
+        return "Valeur invalide"
+    elif glycemie < 100:
+        return "Normale"
+    elif 100 <= glycemie <= 125:
+        return "Prédiabète"
+    else:
+        return "Diabète"
+
+```
